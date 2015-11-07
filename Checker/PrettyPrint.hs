@@ -23,8 +23,10 @@ parensAt m x n | m < n = parens (x 0)
 ppFormulaF :: Functor m => (m PrecDoc -> PrecDoc) -> FormulaF m PrecDoc -> PrecDoc
 ppFormulaF _ (AndF x y) = parensAt 2 $ \n -> x n <+> text "&" <+> y n
 ppFormulaF _ (OrF x y) = parensAt 1 $ \n -> x n <+> text "|" <+> y n
-ppFormulaF _ (ImpliesF x y) = parensAt 0 $ \n -> x (n+1) <+> text "->" <+> y n
+ppFormulaF _ (ImpliesF x y) = parensAt 0 $ \n -> x (n+1) <+> text "->" <+> y (n+1)
 ppFormulaF _ (NotF x) = parensAt 3 $ \n -> text "¬" <> x n
+ppFormulaF _ Truth = const (text "⊤")
+ppFormulaF _ Falsehood = const (text "⊥")
 ppFormulaF f (ModalityF m) = f m
 
 ppModalF :: ModalF PrecDoc -> PrecDoc

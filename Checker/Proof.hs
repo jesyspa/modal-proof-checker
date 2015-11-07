@@ -37,7 +37,9 @@ conclude mf = modify (mf:)
 
 checkStep :: (MonadState [ModalFormula a] m, MonadError () m, Ord a) => RuleApplication a -> m ()
 checkStep (Assume mf) = conclude mf
-checkStep (Tautology t) = assert $ isTautology t
+checkStep (Tautology t) = do
+    assert $ isTautology t
+    conclude $ embed t
 checkStep (Substitution mf s) = do
     require mf
     conclude $ mf >>= toFun s return

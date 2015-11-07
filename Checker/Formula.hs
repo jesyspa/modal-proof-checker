@@ -10,6 +10,8 @@ data FormulaF m r = AndF r r
                   | OrF r r
                   | ImpliesF r r
                   | NotF r
+                  | Truth
+                  | Falsehood
                   | ModalityF (m r)
                   deriving (Eq, Functor, Foldable, Traversable)
 
@@ -25,6 +27,8 @@ evaluateF (AndF x y) = x && y
 evaluateF (OrF x y) = x || y
 evaluateF (ImpliesF x y) = not x || y
 evaluateF (NotF x) = not x
+evaluateF Truth = True
+evaluateF Falsehood = False
 evaluateF (ModalityF m) = absurd (getConst m)
 
 evaluate :: PropFormula Bool -> Bool
@@ -51,6 +55,9 @@ fmodal :: m (Formula m a) -> Formula m a
 fmodal x = Free $ ModalityF x
 fvar :: a -> Formula m a
 fvar = Pure
+ftruth, ffalsehood :: Formula m a
+ftruth = Free Truth
+ffalsehood = Free Falsehood
 
 (.&.), (.|.), (.->.) :: Formula m a -> Formula m a -> Formula m a
 infixl 5 .&.
@@ -65,6 +72,8 @@ embedF (AndF x y) = fand x y
 embedF (OrF x y) = for x y
 embedF (ImpliesF x y) = fimplies x y
 embedF (NotF x) = fnot x
+embedF Truth = ftruth
+embedF Falsehood = ffalsehood
 embedF (ModalityF m) = absurd (getConst m)
 
 embed :: Functor m => PropFormula a -> Formula m a
