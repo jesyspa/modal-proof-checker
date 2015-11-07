@@ -15,6 +15,13 @@ data RuleApplication a = Tautology (PropFormula a)
                        deriving (Eq, Functor, Foldable, Traversable)
 type Proof a = [RuleApplication a]
 
+fk :: a -> a -> ModalFormula a
+fk x y = (fbox $ fvar x .->. fvar y) .->. ((fbox $ fvar x) .->. (fbox $ fvar y))
+fduall, fdualr :: a -> ModalFormula a
+fduall x = (fbox $ fvar x) .->. (fnot $ fdiamond $ fnot $ fvar x)
+fdualr x = (fnot $ fdiamond $ fnot $ fvar x) .->. (fbox $ fvar x)
+
+
 assert :: (MonadState [ModalFormula a] m, MonadError () m, Ord a) => Bool -> m ()
 assert True = return ()
 assert False = throwError ()
@@ -32,9 +39,9 @@ checkStep (Tautology t) = assert $ isTautology t
 checkStep (Substitution mf s) = do
     require mf
     conclude $ mf >>= toFun s return
-checkStep (K x y) = conclude $ (fbox $ fvar x .->. fvar y) .->. ((fbox $ fvar x) .->. (fbox $ fvar y))
-checkStep (DualL x) = conclude $ (fbox $ fvar x) .->. (fnot $ fdiamond $ fnot $ fvar x)
-checkStep (DualR x) = conclude $ (fnot $ fdiamond $ fnot $ fvar x) .->. (fbox $ fvar x)
+checkStep (K x y) = conclude $ fk x y
+checkStep (DualL x) = conclude $ fduall x
+checkStep (DualR x) = conclude $ fdualr x
 checkStep (ModusPonens ma ms) = do
     require ma
     require $ ma .->. ms
