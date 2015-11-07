@@ -40,8 +40,12 @@ ppFormula f = ($0) . ppFormula' f . fmap const
 ppModalFormula :: ModalFormula Doc -> Doc
 ppModalFormula = ppFormula ppModalF
 
+ppPropFormula :: PropFormula Doc -> Doc
+ppPropFormula = ppFormula (absurd . getConst)
+
 ppRuleApplication :: RuleApplication Doc -> Doc
-ppRuleApplication (Tautology pf)      = ppFormula (absurd . getConst) pf
+ppRuleApplication (Assume mf)         = ppModalFormula mf <+> parens (text "assumption")
+ppRuleApplication (Tautology pf)      = ppPropFormula pf <+> parens (text "propositional tautology")
 ppRuleApplication (Substitution mf s) = ppModalFormula (mf >>= toFun s return) <+> parens (text "from" <+> ppModalFormula mf <+> text "by substitution")
 ppRuleApplication (K x y)             = ppModalFormula (fk x y) <+> parens (text "K axiom")
 ppRuleApplication (DualL x)           = ppModalFormula (fduall x) <+> parens (text "Dual axiom")

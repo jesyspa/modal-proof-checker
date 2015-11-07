@@ -5,7 +5,8 @@ import Checker.Modal
 import Control.Monad.State
 import Control.Monad.Except
 
-data RuleApplication a = Tautology (PropFormula a)
+data RuleApplication a = Assume (ModalFormula a)
+                       | Tautology (PropFormula a)
                        | Substitution (ModalFormula a) [(a, ModalFormula a)]
                        | K a a
                        | DualL a
@@ -35,6 +36,7 @@ conclude :: (MonadState [ModalFormula a] m, MonadError () m, Ord a) => ModalForm
 conclude mf = modify (mf:)
 
 checkStep :: (MonadState [ModalFormula a] m, MonadError () m, Ord a) => RuleApplication a -> m ()
+checkStep (Assume mf) = conclude mf
 checkStep (Tautology t) = assert $ isTautology t
 checkStep (Substitution mf s) = do
     require mf
